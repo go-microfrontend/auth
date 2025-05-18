@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: auth-app
+    depends_on:
+      - db
+    environment:
+      - TEMPORAL_ADDR=temporal:7233
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - TASK_QUEUE=auth
+    networks:
+      - auth-network
+      - temporal-network
+
+  db:
+    image: postgres:17
+    container_name: auth-db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    # ports:
+    #   - "5433:5432"
+    volumes:
+      - authdata:/var/lib/postgresql/data
+    networks:
+      - auth-network
+
+
+volumes:
+  authdata:
+
+
+networks:
+  auth-network:
+    driver: bridge
+  temporal-network:
+    external: true
